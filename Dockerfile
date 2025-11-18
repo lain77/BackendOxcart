@@ -3,5 +3,5 @@ COPY . .
 RUN mvn clean package -DskipTests
 FROM amazoncorretto:21-alpine
 COPY --from=build target/Oxcart.jar app.jar
-EXPOSE 9090
+EXPOSE 8415
 CMD ["java", "-jar", "/*.jar"]
