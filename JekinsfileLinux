@@ -24,7 +24,8 @@ pipeline {
         stage('Construir Imagem Docker') {
             steps {
                 script {
-                    def imageTag = "Oxcart:${env.BUILD_ID}"
+                    def appName = 'oxcart'
+                    def imageTag = "oxcart:${env.BUILD_ID}"
                     sh "docker build -t ${imageTag} ."
                 }
             }
@@ -33,8 +34,8 @@ pipeline {
         stage('Fazer Deploy') {
             steps {
                 script {
-                    def appName = 'Oxcart'
-                    def imageTag = "${appName}:${env.BUILD_ID}"
+                    def appName = 'oxcart'
+                    def imageTag = "oxcart:${env.BUILD_ID}"
 
                     sh "docker stop ${appName} || true"
                     sh "docker rm -v ${appName} || true"

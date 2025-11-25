@@ -1,7 +1,8 @@
 FROM maven:3.9.9-amazoncorretto-21-alpine AS build
 COPY . .
 RUN mvn clean package -DskipTests
+
 FROM amazoncorretto:21-alpine
-COPY --from=build target/Oxcart.jar app.jar
+COPY --from=build target/*.jar app.jar
 EXPOSE 8415
-CMD ["java", "-jar", "/*.jar"]
+CMD ["java", "-jar", "app.jar"]
