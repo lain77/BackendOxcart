@@ -1,30 +1,30 @@
 pipeline {
     agent any
+
+    environment {
+        PATH = "/usr/bin:$PATH"
+    }
+
     stages {
         stage('Verificar Repositório') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], useRemoteConfigs: [[url: 'https://github.com/lain77/BackendOxcart.git']]])
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    userRemoteConfigs: [[url: 'https://github.com/lain77/BackendOxcart.git']]
+                ])
             }
         }
 
         stage('Instalar Dependências') {
             steps {
-                script {
-                    // Atualiza o PATH se necessário
-                    env.PATH = "/usr/bin:$PATH"
-                    // Instalar as dependências Maven antes de compilar o projeto
-                    sh 'mvn clean install'  // Instala as dependências do Maven
-                }
+                sh 'mvn clean install'
             }
         }
 
         stage('Construir Imagem Docker') {
             steps {
                 script {
-                    def appName = 'Oxcart'
-                    def imageTag = "${appName}:${env.BUILD_ID}"
-
-                    // Construir a imagem Docker
+                    def imageTag = "Oxcart:${env.BUILD_ID}"
                     sh "docker build -t ${imageTag} ."
                 }
             }
@@ -36,16 +36,15 @@ pipeline {
                     def appName = 'Oxcart'
                     def imageTag = "${appName}:${env.BUILD_ID}"
 
-                    // Parar e remover o container existente, se houver
-            		sh "docker stop ${appName} || exit 0"
-            		sh "docker rm -v ${appName} || exit 0"  // Remover o container e os volumes associados
+                    sh "docker stop ${appName} || true"
+                    sh "docker rm -v ${appName} || true"
 
-                    // Executar o novo container
                     sh "docker run -d --name ${appName} -p 8415:8415 ${imageTag}"
                 }
             }
         }
     }
+
     post {
         success {
             echo 'Deploy realizado com sucesso!'
