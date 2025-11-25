@@ -12,7 +12,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static javax.crypto.Cipher.SECRET_KEY;
-import static sun.security.x509.X509CertInfo.ISSUER;
 
 @Service
 public class JwtTokenService {
