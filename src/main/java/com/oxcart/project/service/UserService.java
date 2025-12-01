@@ -20,70 +20,14 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    // Listar todos os usuários
-    public List<User> listarUsuarios() {
-        return userRepository.findAll();
-    }
-
-    // Buscar usuário por ID
-    public User listarPorUsuarioId(Integer id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
-    // Buscar usuário por email
-    public User buscarPorEmail(String email) {
-        return userRepository.findByEmail(email).orElse(null);
-    }
-
-    // Criar novo usuário
-    public UserDTOResponse criarUsuario(UserDTORequest request) {
-        User user = new User();
-        user.setNome(request.getNome());
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
-
-        User saved = userRepository.save(user);
-        return toResponse(saved);
-    }
-
-    // Atualizar usuário completo
-    public UserDTOResponse atualizarUsuario(Integer id, UserDTORequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        user.setNome(request.getNome());
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
-
-        User updated = userRepository.save(user);
-        return toResponse(updated);
-    }
-
-    // Apagar usuário
-    public void apagarUsuario(Integer id) {
-        userRepository.deleteById(id);
-    }
-
-    // Conversão para DTO de resposta
-    private UserDTOResponse toResponse(User user) {
-        UserDTOResponse dto = new UserDTOResponse();
-        dto.setId(user.getId());
-        dto.setNome(user.getNome());
-        dto.setEmail(user.getEmail());
-        return dto;
-    }
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private SecurityConfiguration securityConfiguration;
@@ -107,11 +51,11 @@ public class UserService {
     // Método responsável por criar um usuário
     public void createUser(CreateUserDto createUserDto) {
         Role role = new Role();
-        role.setName(createUserDto.roleName);
+        role.setName(createUserDto.role());
 
         User newUser = new User();
-        newUser.setEmail(createUserDto.email);
-        newUser.setPassword(securityConfiguration.passwordEncoder().encode(createUserDto.password));
+        newUser.setEmail(createUserDto.email());
+        newUser.setPassword(securityConfiguration.passwordEncoder().encode(createUserDto.password()));
         newUser.setRoles(List.of(role));
 
         // Cria um novo usuário com os dados fornecidos

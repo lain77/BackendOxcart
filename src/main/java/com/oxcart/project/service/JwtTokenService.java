@@ -9,9 +9,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
-
-import static javax.crypto.Cipher.SECRET_KEY;
 
 @Service
 public class JwtTokenService {
@@ -28,10 +25,7 @@ public class JwtTokenService {
                     .withIssuer(ISSUER) // Define o emissor do token
                     .withIssuedAt(creationDate()) // Define a data de emissão do token
                     .withExpiresAt(expirationDate()) // Define a data de expiração do token
-                    .withSubject(user.getUsername())
-                    .withClaim("roles", user.getAuthorities().stream()
-                            .map(role -> role.getAuthority()) // Ex: "ROLE_ADMINISTRATOR"
-                            .toList())
+                    .withSubject(user.getUsername()) // Define o assunto do token (neste caso, o nome de usuário)
                     .sign(algorithm); // Assina o token usando o algoritmo especificado
         } catch (JWTCreationException exception){
             throw new JWTCreationException("Erro ao gerar token.", exception);
@@ -60,18 +54,4 @@ public class JwtTokenService {
         return ZonedDateTime.now(ZoneId.of("America/Recife")).plusHours(4).toInstant();
     }
 
-
-    public List<String> getRolesFromToken(String token) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(String.valueOf(SECRET_KEY));
-            return JWT.require(algorithm)
-                    .withIssuer(ISSUER)
-                    .build()
-                    .verify(token)
-                    .getClaim("roles")
-                    .asList(String.class);
-        } catch (JWTVerificationException exception){
-            throw new JWTVerificationException("Token inválido ou expirado.");
-        }
-    }
 }
