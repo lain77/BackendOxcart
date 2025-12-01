@@ -22,9 +22,9 @@ public class SecurityConfiguration {
     private UserAuthenticationFilter userAuthenticationFilter;
 
     public static final String [] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {
-            "/user/login", // Url que usaremos para fazer login
-            "/user",// Url que usaremos para criar um usuário
-            "/api/user/criar",
+            "/users/login", // Url que usaremos para fazer login
+            "/users",// Url que usaremos para criar um usuário
+            "/api/users/criar",
             "/h2-console",
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -33,17 +33,17 @@ public class SecurityConfiguration {
 
     // Endpoints que requerem autenticação para serem acessados
     public static final String [] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = {
-            "/user/test"
+            "/users/test"
     };
 
     // Endpoints que só podem ser acessador por usuários com permissão de cliente
     public static final String [] ENDPOINTS_CUSTOMER = {
-            "/user/test/customer"
+            "/users/test/customer"
     };
 
     // Endpoints que só podem ser acessador por usuários com permissão de administrador
     public static final String [] ENDPOINTS_ADMIN = {
-            "/user/test/administrator"
+            "/users/test/administrator"
     };
 
     @Bean
