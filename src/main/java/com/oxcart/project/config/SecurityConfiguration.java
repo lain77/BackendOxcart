@@ -28,7 +28,9 @@ public class SecurityConfiguration {
             "/h2-console/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/actuator/**",
+            "/actuator"
     };
 
     // ROTAS DE USUARIO COMUM
