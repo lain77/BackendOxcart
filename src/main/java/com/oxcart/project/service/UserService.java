@@ -7,6 +7,7 @@ import com.oxcart.project.dto.extra.RecoveryJwtTokenDto;
 import com.oxcart.project.dto.request.UserDTORequest;
 import com.oxcart.project.dto.response.UserDTOResponse;
 import com.oxcart.project.entity.Role;
+import com.oxcart.project.entity.RoleName;
 import com.oxcart.project.entity.User;
 import com.oxcart.project.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,24 +52,21 @@ public class UserService {
     // Método responsável por criar um usuário
     public void createUser(CreateUserDto createUserDto) {
         Role role = new Role();
-        role.setName(createUserDto.role());
+
+        // Tenta converter a String (ex: "ROLE_USUARIO") para o Enum.
+        // Se o front enviar apenas "USUARIO", você precisa adicionar o "ROLE_" antes.
+        try {
+            role.setName(RoleName.valueOf(String.valueOf(createUserDto.role())));
+        } catch (IllegalArgumentException e) {
+            // Fallback caso o front mande sem o prefixo
+            role.setName(RoleName.valueOf("ROLE_" + createUserDto.role()));
+        }
 
         User newUser = new User();
         newUser.setEmail(createUserDto.email());
         newUser.setPassword(securityConfiguration.passwordEncoder().encode(createUserDto.password()));
         newUser.setRoles(List.of(role));
 
-        // Cria um novo usuário com os dados fornecidos
-        /*
-        User newUser = User.builder()
-                .email(createUserDto.email())
-                // Codifica a senha do usuário com o algoritmo bcrypt
-                .password(securityConfiguration.passwordEncoder().encode(createUserDto.password()))
-                // Atribui ao usuário uma permissão específica
-                .roles(List.of(Role.builder().name(createUserDto.role()).build()))
-                .build();
-         */
-        // Salva o novo usuário no banco de dados
         userRepository.save(newUser);
     }
 }

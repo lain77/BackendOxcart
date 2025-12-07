@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.HttpSecurityDsl;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,30 +20,27 @@ public class SecurityConfiguration {
     @Autowired
     private UserAuthenticationFilter userAuthenticationFilter;
 
+    // ROTAS PÚBLICAS (Sem /oxcart)
     public static final String [] ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED = {
-            "/oxcart/users/login",
-            "/oxcart/users",
-            "/oxcart/api/users/criar",
-            "/oxcart/h2-console/**",
-            "/oxcart/v3/api-docs/**",
-            "/oxcart/swagger-ui/**",
-            "/oxcart/swagger-ui.html"
+            "/users/login",
+            "/users",
+            "/api/users/criar",
+            "/h2-console/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
 
-
-    // Endpoints que requerem autenticação para serem acessados
-    public static final String [] ENDPOINTS_WITH_AUTHENTICATION_REQUIRED = {
-
-    };
-
-    // Endpoints que só podem ser acessador por usuários com permissão de cliente
+    // ROTAS DE USUARIO COMUM
     public static final String [] ENDPOINTS_CUSTOMER = {
-
+            "/api/aircraft/listar" // Exemplo
     };
 
-    // Endpoints que só podem ser acessador por usuários com permissão de administrador
+    // ROTAS DE ADMINISTRADOR (Lider Comite)
     public static final String [] ENDPOINTS_ADMIN = {
-            "/oxcart/users/test/administrator"
+            "/users/test/administrator",
+            "/api/aircraft/criar",
+            "/api/aircraft/apagar/**"
     };
 
     @Bean
@@ -54,9 +50,9 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_NOT_REQUIRED).permitAll()
-                        .requestMatchers(ENDPOINTS_ADMIN).hasRole("ADMINISTRATOR")
-                        .requestMatchers(ENDPOINTS_CUSTOMER).hasRole("CUSTOMER")
-                        .requestMatchers(ENDPOINTS_WITH_AUTHENTICATION_REQUIRED).authenticated()
+                        // hasRole("LIDERCOMITE") procura por "ROLE_LIDERCOMITE" no UserDetails
+                        .requestMatchers(ENDPOINTS_ADMIN).hasRole("LIDERCOMITE")
+                        .requestMatchers(ENDPOINTS_CUSTOMER).hasRole("USUARIO")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -68,9 +64,43 @@ public class SecurityConfiguration {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    //BASICAMENTE O PROFESSOR BOTOU 45 CARACTERES NO MEU USER_PASSWORD ENTÃO O BCrypt É GRANDE DEMAIS PARA SALVAR
+    //QUANDO ELE MUDAR, APAGUE O MÉTODO QUE ESTÁ EMBAIXO DESTE E DESCOMENTE O METODO ORIGINAL
+
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        // Implementação manual de MD5 para caber na coluna de 45 caracteres do banco
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return md5(rawPassword.toString());
+            }
 
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                // Verifica se a senha digitada (hashada) bate com a do banco
+                return md5(rawPassword.toString()).equals(encodedPassword);
+            }
+
+            // Função auxiliar para gerar o Hash MD5 (32 caracteres)
+            private String md5(String s) {
+                try {
+                    java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+                    byte[] array = md.digest(s.getBytes());
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < array.length; ++i) {
+                        sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
+                    }
+                    return sb.toString();
+                } catch (java.security.NoSuchAlgorithmException e) {
+                    throw new RuntimeException("Erro ao gerar MD5", e);
+                }
+            }
+        };
+    }
 }
