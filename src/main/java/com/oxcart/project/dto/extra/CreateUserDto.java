@@ -4,6 +4,7 @@ import com.oxcart.project.entity.RoleName;
 
 public record CreateUserDto(
 
+        String username,
         String email,
         String password,
         RoleName role

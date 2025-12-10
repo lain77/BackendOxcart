@@ -63,10 +63,22 @@ public class UserService {
         }
 
         User newUser = new User();
+        newUser.setNome(createUserDto.username());
         newUser.setEmail(createUserDto.email());
         newUser.setPassword(securityConfiguration.passwordEncoder().encode(createUserDto.password()));
         newUser.setRoles(List.of(role));
 
         userRepository.save(newUser);
+    }
+
+    public void updateName(String email, String newName) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found via token credential"));
+
+        // 2. Atualiza o nome (usando setNome() conforme seu código anterior)
+        user.setNome(newName);
+
+        // 3. Salva no banco
+        userRepository.save(user);
     }
 }

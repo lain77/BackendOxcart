@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -28,12 +30,13 @@ public class SecurityConfiguration {
             "/h2-console/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/api/aircraft/listar"
     };
 
     // ROTAS DE USUARIO COMUM
     public static final String [] ENDPOINTS_CUSTOMER = {
-            "/api/aircraft/listar" // Exemplo
+//            "/api/aircraft/listar" // Exemplo
     };
 
     // ROTAS DE ADMINISTRADOR (Lider Comite)
@@ -100,6 +103,18 @@ public class SecurityConfiguration {
                 } catch (java.security.NoSuchAlgorithmException e) {
                     throw new RuntimeException("Erro ao gerar MD5", e);
                 }
+            }
+        };
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**") // Libera tudo
+                        .allowedOrigins("*") // Libera para qualquer origem
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
             }
         };
     }
