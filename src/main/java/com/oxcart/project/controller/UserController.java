@@ -5,6 +5,7 @@ import com.oxcart.project.dto.extra.LoginUserDto;
 import com.oxcart.project.dto.extra.RecoveryJwtTokenDto;
 import com.oxcart.project.dto.extra.UpdateNameDTO;
 // Importações não utilizadas (UserDTORequest, UserDTOResponse, User, List) foram removidas para clareza
+import com.oxcart.project.dto.response.UserStatsDTOResponse;
 import com.oxcart.project.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -73,5 +74,15 @@ public class UserController {
     @GetMapping("/test/administrator")
     public ResponseEntity<String> getAdminAuthenticationTest() {
         return ResponseEntity.ok("Administrador autenticado com sucesso");
+    }
+
+    @Operation(summary = "Retorna os dados do perfil do usuário logado",
+            description = "Retorna nome, email, id e estatísticas.")
+    @GetMapping("/stats")
+    public ResponseEntity<UserStatsDTOResponse> getUserStats(Principal principal) {
+        // principal.getName() pega o email do token JWT automaticamente
+        UserStatsDTOResponse stats = userService.getUserStats(principal.getName());
+
+        return ResponseEntity.ok(stats);
     }
 }

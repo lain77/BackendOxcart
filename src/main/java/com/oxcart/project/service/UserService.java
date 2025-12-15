@@ -6,6 +6,7 @@ import com.oxcart.project.dto.extra.LoginUserDto;
 import com.oxcart.project.dto.extra.RecoveryJwtTokenDto;
 import com.oxcart.project.dto.request.UserDTORequest;
 import com.oxcart.project.dto.response.UserDTOResponse;
+import com.oxcart.project.dto.response.UserStatsDTOResponse;
 import com.oxcart.project.entity.Role;
 import com.oxcart.project.entity.RoleName;
 import com.oxcart.project.entity.User;
@@ -80,5 +81,22 @@ public class UserService {
 
         // 3. Salva no banco
         userRepository.save(user);
+    }
+
+    public UserStatsDTOResponse getUserStats(String email) {
+        // 1. Busca o usuário no banco
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        // 2. Retorna o DTO preenchido
+        // Nota: Certifique-se que sua entidade User tem o método getNome() ou getName()
+        return new UserStatsDTOResponse(
+                Long.valueOf(user.getId()), // Garante que seja Long
+                user.getNome(),             // O nome que será exibido no App
+                user.getEmail(),
+                0, // total_flights (placeholder)
+                0, // aircraft_count (placeholder)
+                0  // credits (placeholder)
+        );
     }
 }
