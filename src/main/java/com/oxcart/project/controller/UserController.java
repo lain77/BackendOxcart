@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @Operation(summary = "Cria um novo usuário no sistema", description = "Endpoint público para registro.")
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Void> createUser(@RequestBody CreateUserDto createUserDto) {
         userService.createUser(createUserDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
