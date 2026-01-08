@@ -85,4 +85,11 @@ public class UserController {
 
         return ResponseEntity.ok(stats);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserStatsDTOResponse> getMe(Principal principal) {
+        return ResponseEntity.ok(
+                userService.getUserStats(principal.getName())
+        );
+    }
 }
