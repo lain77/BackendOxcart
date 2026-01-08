@@ -126,13 +126,4 @@ public class SecurityConfiguration {
         };
     }
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .servers(List.of(
-                        // O segredo está no "https" aqui
-                        new Server().url("https://backendoxcart-production.up.railway.app/oxcart").description("Servidor de Produção"),
-                        new Server().url("http://localhost:8080/oxcart").description("Servidor Local")
-                ));
-    }
 }
