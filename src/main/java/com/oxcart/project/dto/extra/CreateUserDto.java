@@ -1,13 +1,10 @@
 package com.oxcart.project.dto.extra;
 
-import com.oxcart.project.entity.RoleName;
-
+// Alterado de RoleName para String
 public record CreateUserDto(
-
         String username,
         String email,
         String password,
-        RoleName role
-
+        String role
 ) {
 }

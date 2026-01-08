@@ -46,23 +46,24 @@ public class UserService {
         User newUser = new User();
         newUser.setNome(createUserDto.username());
         newUser.setEmail(createUserDto.email());
-
-        // Mantendo o MD5 por causa do limite de 45 caracteres do seu banco
         newUser.setPassword(securityConfiguration.passwordEncoder().encode(createUserDto.password()));
 
-        // --- LÓGICA DE ROLE PROTEGIDA ---
         Role role = new Role();
         try {
-            String roleInput = String.valueOf(createUserDto.role());
+            // Agora pegamos direto como String do DTO
+            String roleInput = createUserDto.role();
+
             if (roleInput == null || roleInput.isEmpty()) {
                 role.setName(RoleName.ROLE_USUARIO);
             } else {
-                // Se o front mandar "USUARIO", vira "ROLE_USUARIO". Se mandar "ROLE_USUARIO", mantém.
-                String roleName = roleInput.startsWith("ROLE_") ? roleInput : "ROLE_" + roleInput;
+                // Se vier "USUARIO", vira "ROLE_USUARIO"
+                String roleName = roleInput.toUpperCase().startsWith("ROLE_")
+                        ? roleInput.toUpperCase()
+                        : "ROLE_" + roleInput.toUpperCase();
                 role.setName(RoleName.valueOf(roleName));
             }
         } catch (Exception e) {
-            // Se der qualquer erro no Enum, define como USUARIO padrão
+            // Fallback total para evitar o erro 403/500
             role.setName(RoleName.ROLE_USUARIO);
         }
 
