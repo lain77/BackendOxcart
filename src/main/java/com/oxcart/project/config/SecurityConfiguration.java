@@ -74,45 +74,11 @@ public class SecurityConfiguration {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    //BASICAMENTE O PROFESSOR BOTOU 45 CARACTERES NO MEU USER_PASSWORD ENTÃO O BCrypt É GRANDE DEMAIS PARA SALVAR
-    //QUANDO ELE MUDAR, APAGUE O MÉTODO QUE ESTÁ EMBAIXO DESTE E DESCOMENTE O METODO ORIGINAL
-
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Implementação manual de MD5 para caber na coluna de 45 caracteres do banco
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence rawPassword) {
-                return md5(rawPassword.toString());
-            }
-
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                // Verifica se a senha digitada (hashada) bate com a do banco
-                return md5(rawPassword.toString()).equals(encodedPassword);
-            }
-
-            // Função auxiliar para gerar o Hash MD5 (32 caracteres)
-            private String md5(String s) {
-                try {
-                    java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-                    byte[] array = md.digest(s.getBytes());
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < array.length; ++i) {
-                        sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1, 3));
-                    }
-                    return sb.toString();
-                } catch (java.security.NoSuchAlgorithmException e) {
-                    throw new RuntimeException("Erro ao gerar MD5", e);
-                }
-            }
-        };
+        return new BCryptPasswordEncoder();
     }
+
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
