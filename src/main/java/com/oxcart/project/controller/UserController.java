@@ -5,6 +5,7 @@ import com.oxcart.project.dto.extra.LoginUserDto;
 import com.oxcart.project.dto.extra.RecoveryJwtTokenDto;
 import com.oxcart.project.dto.extra.UpdateNameDTO;
 // Importações não utilizadas (UserDTORequest, UserDTOResponse, User, List) foram removidas para clareza
+import com.oxcart.project.dto.response.LoginResponseDTO;
 import com.oxcart.project.dto.response.UserStatsDTOResponse;
 import com.oxcart.project.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,11 +27,28 @@ public class UserController {
 
     // --- 1. AUTENTICAÇÃO E CADASTRO ---
 
-    @Operation(summary = "Realiza o Login e retorna o Token JWT", description = "Endpoint público para autenticação.")
+    @Operation(summary = "Realiza o Login e retorna Token + Dados", description = "Endpoint público.")
     @PostMapping("/login")
-    public ResponseEntity<RecoveryJwtTokenDto> authenticateUser(@RequestBody LoginUserDto loginUserDto) {
-        RecoveryJwtTokenDto token = userService.authenticateUser(loginUserDto);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+    public ResponseEntity<LoginResponseDTO> authenticateUser(@RequestBody LoginUserDto loginUserDto) {
+
+        // 1. Gera o Token (como já fazia)
+        RecoveryJwtTokenDto tokenDto = userService.authenticateUser(loginUserDto);
+
+        // 2. Busca os dados do usuário pelo email do login
+        UserStatsDTOResponse stats = userService.getUserStats(loginUserDto.email());
+
+        // 3. Monta a resposta completa
+        LoginResponseDTO response = new LoginResponseDTO(
+                tokenDto.token(),
+                stats.id(),
+                stats.name(),
+                stats.email(),
+                stats.total_flights(),
+                stats.aircraft_count(),
+                stats.credits()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Cria um novo usuário no sistema", description = "Endpoint público para registro.")
